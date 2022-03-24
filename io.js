@@ -24,7 +24,7 @@ module.exports.init = function(server) {
         let room = {
             id: rooms.length,
             creatorId: userId,
-            creatorName: users.find(function(user){return userId == user.id}).name,
+            creatorName: users.find(function(user){return userId === user.id}).name,
             opponentId: undefined,
             opponentName: '',
             creatorIsWhite: isWhite,
@@ -54,7 +54,7 @@ module.exports.init = function(server) {
         let user;
 
         socket.on('page:loaded', (receivedId) => {
-            if (receivedId === 'no' || !users.find((user) => !user.isActive && receivedId == user.id)) {
+            if (receivedId === 'no' || !users.find((user) => !user.isActive && receivedId === user.id)) {
                 user = {
                     id: generateUserId(),
                     name: "",
@@ -66,8 +66,8 @@ module.exports.init = function(server) {
                 users.push(user);
                 socket.emit('give:id', user.id);
             } else {
-                user = users.find((user) => receivedId == user.id);
-                room = rooms.find((room) => room.creatorId == user.id || room.opponentId == user.id);
+                user = users.find((user) => receivedId === user.id);
+                room = rooms.find((room) => room.creatorId === user.id || room.opponentId === user.id);
                 socket.emit('give:id', user.id);
                 if (user.name) {
                     socket.emit('give:name', user.name);
@@ -131,7 +131,7 @@ module.exports.init = function(server) {
         goEmitter.on('room:possibility', roomPosibilityCallback);
 
         let roomExitCallback = function(roomId){
-            if (room && room.id == roomId) {
+            if (room && room.id === roomId) {
                 socket.emit('room:exit');
             }
         };
@@ -141,8 +141,8 @@ module.exports.init = function(server) {
         socket.on('name:set', function(name){
             user.name = name;
             socket.emit('give:name', name);
-            let createdRoom = rooms.find((room) => room.creatorId==user.id);
-            let assignedRoom = rooms.find((room) => room.opponentId==user.id);
+            let createdRoom = rooms.find((room) => room.creatorId === user.id);
+            let assignedRoom = rooms.find((room) => room.opponentId === user.id);
             if (createdRoom) {
                 createdRoom.creatorName = name;
                 goEmitter.emit('rooms:update');
@@ -162,7 +162,7 @@ module.exports.init = function(server) {
         });
 
         socket.on('room:choose', (id) => {
-            room = rooms.find((room) => room.id == id);
+            room = rooms.find((room) => room.id === +id);
             user.isWhite = !room.creatorIsWhite;
             room.opponentId = user.id;
             room.opponentName = user.name;
@@ -196,7 +196,7 @@ module.exports.init = function(server) {
         socket.on('room:exit', () => {
             // if user exits from room that he hasn't created and he wasn't played in it - room will appear in list
             // else - room will hide forever
-            if (!room.table.find((cell) => !cell.isEmpty) && (room.creatorId != user.id)) {
+            if (!room.table.find((cell) => !cell.isEmpty) && (room.creatorId !== user.id)) {
                 room.started = false;
                 socket.emit('room:exit');
             } else {

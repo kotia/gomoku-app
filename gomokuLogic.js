@@ -54,13 +54,16 @@ let watchLine = function(table, isWhite, cell, row, cellModifier, rowModifier, o
 };
 
 let watchLines = function(table, isWhite, cell, row, only) {
-    let results = [];
+    const results = [];
     let isOk = false;
-    let cellNumber = rowLength*row + cell;
+    const cellNumber = rowLength * row + cell;
+
+    const cellHasRightColor = table[cellNumber].isWhite === isWhite;
+    const cellIsEmpty = table[cellNumber].isEmpty;
 
     if (
-        (only && (table[cellNumber].isEmpty || table[cellNumber].isWhite !== isWhite)) ||
-        (!only && !table[cellNumber].isEmpty && table[cellNumber].isWhite !== isWhite)
+        (only && (cellIsEmpty || !cellHasRightColor)) ||
+        (!only && !cellIsEmpty && !cellHasRightColor)
     ) {
         return false;
     }
