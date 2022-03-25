@@ -24,7 +24,7 @@ let tableConstructor = function(){
 };
 
 let watchLine = function(table, isWhite, cell, row, cellModifier, rowModifier, only){
-    // if only = true, than we count only cells with the same color
+    // if only = true, then we count only cells with the same color
     // if only = false, we count cells with color AND empty cells
     let length = 0;
     let isSame = true;
