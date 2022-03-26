@@ -19,7 +19,6 @@
     "eject": "react-scripts eject",
     "node": "node"
   },
-  "proxy": "http://node:3001",
   "browserslist": {
     "production": [
       ">0.2%",

@@ -8,7 +8,11 @@ import io from "socket.io-client";
 export function goMiddleware(store) {
 
     const userId = window.localStorage.userId;
-    const host = window.location.origin.replace(/^http/, 'ws');
+    const kek = "ws://node:3001";
+    const host = window.location.origin
+        .replace(/^http/, 'ws')
+        .replace(/:\d+/, ':3001');
+
     const socket = io.connect(host, {
         transports: ["polling", "websocket"]
     });

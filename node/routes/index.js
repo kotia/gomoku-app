@@ -1,13 +1,13 @@
 var express = require('express');
-var router = express.Router();
+var app = express();
 
 /* GET home page. */
-router.get(/^\/(?!{javascripts|socket\.io|stylesheets|templates|images})/, function(req, res) {
-    var env = req.params('env') || process.env.NODE_ENV;
+
+app.get('/', function(req, res) {
+    var env = req.params.env || process.env.NODE_ENV;
 
     res.render('index', { env: env });
 });
 
 
-
-module.exports = router;
+module.exports = app;

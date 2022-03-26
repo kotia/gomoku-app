@@ -29,4 +29,5 @@ services:
 volumes:
   build:
   be-node-modules:
+  be-koa-node-modules:
   fe-node-modules:
