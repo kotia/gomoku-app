@@ -1,5 +1,15 @@
 version: '3.8'
 services:
+  static:
+    build: ./nginx
+    volumes:
+      - "build:/usr/share/nginx/another"
+    ports:
+      - "5001:80"
+    links:
+      - node
+    depends_on:
+      - react
   node:
     build: ./node
     environment:
@@ -18,8 +28,6 @@ services:
       - "fe-node-modules:/home/node/app/node_modules/"
     ports:
       - "3000:3000"
-    links:
-      - node
     environment:
       - CHOKIDAR_USEPOLLING=true
     stdin_open: true
@@ -29,5 +37,4 @@ services:
 volumes:
   build:
   be-node-modules:
-  be-koa-node-modules:
   fe-node-modules:
