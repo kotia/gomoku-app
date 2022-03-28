@@ -13,7 +13,7 @@ export function goMiddleware(store) {
         .replace(/:\d+/, ':5001');
 
     const socket = io.connect(host, {
-        transports: ["polling", "websocket"]
+        transports: ["websocket", "polling"]
     });
 
     socket.on('give:id', (id) => {

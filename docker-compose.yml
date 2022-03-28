@@ -3,7 +3,7 @@ services:
   static:
     build: ./nginx
     volumes:
-      - "build:/usr/share/nginx/another"
+      - "./nginx/conf:/etc/nginx/"
     ports:
       - "5001:80"
     links:
