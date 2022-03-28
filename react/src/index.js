@@ -7,5 +7,10 @@ import './style.css';
 import Game from "./components/game";
 import registerServiceWorker from './registerServiceWorker';
 
-ReactDOM.render(<Provider store={store}><Game /></Provider>, document.getElementById('root'));
+ReactDOM.render(
+    <Provider store={store}>
+        <Game />
+    </Provider>,
+    document.getElementById('root')
+);
 registerServiceWorker();

@@ -5,26 +5,24 @@ import {
     setName, giveName
 } from "../actions";
 
-export class UserFieldContainer extends React.Component {
-    render() {
-        const nameElement = this.props.user.name && this.props.user.nameSaved ?
+const UserFieldContainer = ({user, onGiveName, onSetName}) => {
+        const nameElement = user.name && user.nameSaved ?
             (
-                <div>Your name is {this.props.user.name}</div>
+                <div>Your name is {user.name}</div>
             ):(
                 <div>
                     What is you name?
-                    <input type="text" value={this.props.user.name} onChange={this.props.onGiveName} />
-                    <button onClick={this.props.onSetName}>Save name!</button>
+                    <input type="text" value={user.name} onChange={onGiveName} />
+                    <button onClick={onSetName}>Save name!</button>
                 </div>
             );
 
         return (
             <div className="userinfo-container">
-                You user ID is {this.props.user.userId}.
+                You user ID is {user.userId}.
                 {nameElement}
             </div>
         )
-    }
 }
 
 const mapStateToProps = (store) => ({

@@ -3,64 +3,52 @@ import * as React from "react";
 import { connect } from 'react-redux';
 import {createRoom, chooseRoom} from "../actions";
 
-class CreateRoomButtons extends React.Component {
-    render() {
-        return (
-            <div className="create-room-buttons">
-                <button data-color="white" onClick={this.props.createRoom}>Create room with you as White!</button>
-                <button data-color="black" onClick={this.props.createRoom}>Create room with you as Black!</button>
-            </div>
-        );
-    }
+const CreateRoomButtons = ({createRoom}) => {
+    return (
+        <div className="create-room-buttons">
+            <button data-color="white" onClick={createRoom}>Create room with you as White!</button>
+            <button data-color="black" onClick={createRoom}>Create room with you as Black!</button>
+        </div>
+    );
 }
 
-class RoomsList extends React.Component {
-    render() {
-        return (
-            <div className="rooms-list">
-                {this.props.rooms.map((room, index) => {
-                    return(
-                        <div className="rooms-list__room"
-                             onClick={this.props.chooseRoom}
-                             data-id={room.id}
-                             key={index}
-                        >
-                            {room.creatorName || room.id}: {'You play ' + (room.isYouWhite ? 'white' : 'black')}
-                        </div>
-                    );
-                })}
-            </div>
-        );
-    }
+const RoomsList = ({rooms, chooseRoom}) => {
+    return (
+        <div className="rooms-list">
+            {rooms.map((room, index) => {
+                return(
+                    <div className="rooms-list__room"
+                         onClick={chooseRoom}
+                         data-id={room.id}
+                         key={index}
+                    >
+                        {room.creatorName || room.id}: {'You play ' + (room.isYouWhite ? 'white' : 'black')}
+                    </div>
+                );
+            })}
+        </div>
+    );
 }
 
-class RoomsListContainer extends React.Component {
-    constructor(props) {
-        super(props);
-        this.actions = {
-            createRoom: this.createRoom.bind(this),
-            chooseRoom: this.chooseRoom.bind(this)
-        }
-    }
+const RoomsListContainer = ({rooms}) => {
 
-    createRoom(e) {
+    const createRoom = (e) => {
         const isWhite = e.currentTarget.dataset.color === 'white';
         this.props.onCreateRoom(isWhite);
     }
 
-    chooseRoom(e) {
+    const chooseRoom = (e) => {
         this.props.onChooseRoom(e.currentTarget.dataset.id);
     }
 
-    render() {
         return (
             <div>
-                <CreateRoomButtons createRoom={this.actions.createRoom}/>
-                <RoomsList chooseRoom={this.actions.chooseRoom} rooms={this.props.rooms}/>
+                <CreateRoomButtons createRoom={createRoom}/>
+                <RoomsList chooseRoom={chooseRoom} rooms={rooms}/>
             </div>
 
         );
-    }
+
 }
 
 const mapStateToProps = (store) => ({

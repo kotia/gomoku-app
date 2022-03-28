@@ -5,31 +5,25 @@ import { connect } from 'react-redux';
 import { makeTurn } from "../actions";
 import { isUserTurn } from "../getUserInfo";
 
-class TableCellContainer extends React.Component {
-    constructor(props) {
-        super(props);
+const TableCellContainer = ({ cell, room, onMakeTurn }) => {
 
-        this.makeTurn = this.makeTurn.bind(this);
-    }
 
-    makeTurn() {
-        if (this.props.cell.isEmpty && isUserTurn(this.props)) {
-            this.props.onMakeTurn(this.props.cell.id);
+    const makeTurn = () => {
+        if (cell.isEmpty && isUserTurn({room})) {
+            onMakeTurn(cell.id);
         }
     }
 
-    render() {
         return (
             <div
-                onClick={this.makeTurn}
+                onClick={makeTurn}
                 className="gomoku-container__row__cell">
                 <div className={
                     'gomoku-container__row__cell__circle ' +
-                    (this.props.cell.isEmpty ? '' : (this.props.cell.isWhite ? 'white' : 'black'))
+                    (cell.isEmpty ? '' : (cell.isWhite ? 'white' : 'black'))
                 } />
             </div>
         )
-    }
 }
 
 const mapStateToPropsOne = (store) => ({
