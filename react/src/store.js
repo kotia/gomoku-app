@@ -1,6 +1,27 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import * as actionTypes from './actions'
 import {goMiddleware} from './middleware'
+import {atom, useSetRecoilState} from "recoil";
+
+export const roomsListState = atom({
+    key: 'roomsList',
+    default: [],
+});
+
+export const roomsListStateSetter = () => {
+    const setRoomsList = useSetRecoilState(roomsListState);
+
+    const addNewRoom = ({id, creatorIsWhite, creatorId, creatorName}) => {
+        setRoomsList((roomsList) => [...roomsList, {
+            id,
+            isYouWhite: !creatorIsWhite,
+            creatorId,
+            creatorName
+        }]);
+    };
+
+    return [addNewRoom];
+};
 
 const roomsReducer = function(state = [], action) {
     if (action.type === actionTypes.FETCH_ROOMS) {
