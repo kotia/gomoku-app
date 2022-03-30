@@ -8,6 +8,16 @@ export const roomsListState = atom({
     default: [],
 });
 
+export const roomState = atom({
+    key: 'room',
+    default: {},
+});
+
+export const userState = atom({
+    key: 'user',
+    default: {},
+});
+
 export const roomsListStateSetter = () => {
     const setRoomsList = useSetRecoilState(roomsListState);
 
@@ -21,6 +31,78 @@ export const roomsListStateSetter = () => {
     };
 
     return [addNewRoom];
+};
+
+export const roomStateSetter = () => {
+    const setRoom = useSetRecoilState(roomState);
+
+    const enterRoom = ({roomId, room: {table, creatorIsWhite, isWhiteTurn, creatorId, opponentId, creatorName, opponentName, started}}) => {
+        setRoom({
+            roomId: roomId,
+            isWin: false,
+            isDefeat: false,
+            isImpossible: false,
+            isFinished: false,
+            table: table,
+            creatorIsWhite: creatorIsWhite,
+            isWhiteTurn: isWhiteTurn,
+            creatorId: creatorId,
+            opponentId: opponentId,
+            creatorName: creatorName,
+            opponentName: opponentName,
+            started: started
+        });
+    };
+
+    const updateRoom = ({table, isWhiteTurn, opponentId, opponentName, creatorName, started}) => {
+        setRoom((room) => {
+            return {
+                ...room,
+                table,
+                isWhiteTurn,
+                opponentId,
+                opponentName,
+                creatorName,
+                started
+            };
+        });
+    };
+
+    const winGame = () => {
+        setRoom((room) => {
+            return {
+                ...room,
+                isWin: true,
+                isFinished: true
+            };
+        });
+    };
+
+    const defeatGame = () => {
+        setRoom((room) => {
+            return {
+                ...room,
+                isDefeat: true,
+                isFinished: true
+            };
+        });
+    };
+
+    const gameImpossible = () => {
+        setRoom((room) => {
+            return {
+                ...room,
+                isImpossible: true,
+                isFinished: true
+            };
+        });
+    };
+
+    const exitRoom = () => {
+        setRoom({});
+    };
+
+    return [setRoomState];
 };
 
 const roomsReducer = function(state = [], action) {
