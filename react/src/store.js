@@ -1,7 +1,7 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import * as actionTypes from './actions'
 import {goMiddleware} from './middleware'
-import {atom, useSetRecoilState} from "recoil";
+import {atom, selector, useSetRecoilState} from "recoil";
 
 export const roomsListState = atom({
     key: 'roomsList',
@@ -15,22 +15,69 @@ export const roomState = atom({
 
 export const userState = atom({
     key: 'user',
-    default: {},
+    default: {
+        userId: 0,
+        name: "",
+        nameSaved: false
+    },
+});
+
+export const roomsListSelector = selector({
+    key: 'roomsListSelector',
+    get: ({get}) => get(roomsListState),
+    set: (_, action) => {
+        if (action.type === 'create_room')
+        {
+            socket.emit('room:create', action.payload.isWhite);
+        }
+
+        if (action.type === 'exit_room')
+        {
+            socket.emit('room:exit');
+        }
+    }
+});
+
+export const roomSelector = selector({
+    key: 'roomSelector',
+    get: ({get}) => get(roomState),
+    set: (_, action) => {
+        if (action.type === 'choose_room') {
+            socket.emit('room:choose', action.payload.id);
+        }
+
+        if (action.type === 'make_turn') {
+            socket.emit('room:makeTurn', action.payload.id);
+        }
+    }
+});
+
+export const userSelector = selector({
+    key: 'userSelector',
+    get: ({get}) => get(userState),
+    set: (_, action) => {
+        if (action.type === 'set_user_name')
+        {
+            socket.emit('name:set', action.payload.name);
+        }
+    }
 });
 
 export const roomsListStateSetter = () => {
     const setRoomsList = useSetRecoilState(roomsListState);
 
-    const addNewRoom = ({id, creatorIsWhite, creatorId, creatorName}) => {
-        setRoomsList((roomsList) => [...roomsList, {
-            id,
-            isYouWhite: !creatorIsWhite,
-            creatorId,
-            creatorName
-        }]);
+    const saveRooms = (rooms) => {
+        setRoomsList(rooms.map(({id, creatorIsWhite, creatorId, creatorName}) => {
+            return {
+                id,
+                isYouWhite: !creatorIsWhite,
+                creatorId,
+                creatorName
+            }
+        }));
     };
 
-    return [addNewRoom];
+    return [saveRooms];
 };
 
 export const roomStateSetter = () => {
@@ -102,7 +149,45 @@ export const roomStateSetter = () => {
         setRoom({});
     };
 
-    return [setRoomState];
+    return [enterRoom, updateRoom, winGame, defeatGame, gameImpossible, exitRoom];
+};
+
+export const userStateSetter = (socket) => {
+    const setUser = useSetRecoilState(userState);
+
+    const saveUserName = (username) => {
+        socket.emit('name:set', username);
+    };
+
+    const setUserName = ({name}) => {
+        setUser((user) => {
+            return {
+                ...user,
+                name,
+                nameSaved: true
+            };
+        });
+    };
+
+    const setUserId = ({userId}) => {
+        setUser((user) => {
+            return {
+                ...user,
+                userId
+            };
+        });
+    };
+
+    const setNameSaved = () => {
+        setUser((user) => {
+            return {
+                ...user,
+                nameSaved: true
+            };
+        });
+    };
+
+    return [setUserName, setUserId, setNameSaved, saveUserName];
 };
 
 const roomsReducer = function(state = [], action) {
