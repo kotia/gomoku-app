@@ -1,25 +1,18 @@
 import * as React from "react";
-import { connect } from 'react-redux';
 
 import RoomsList from "./roomsList";
 import Room from "./room";
 import UserField from "./userfield";
 import {useRecoilMiddleware} from "../recoilMiddleware";
 import {useEffect} from "react";
-import {roomSelector, roomsListSelector, userSelector} from "../store";
 import {useRecoilState} from "recoil";
+import {roomSelector} from "../store";
 
-const GameContainer = (props) => {
+const GameContainer = () => {
     const [init] = useRecoilMiddleware();
 
-    const [roomsList, roomsListAction] = useRecoilState(roomsListSelector);
-    const [room, roomAction] = useRecoilState(roomSelector);
-    const [user, userAction] = useRecoilState(userSelector);
+    const [room] = useRecoilState(roomSelector);
 
-    console.log(roomsList);
-    console.log(room);
-    console.log(user);
-    console.log('-------');
 
     useEffect(() => {
         init();
@@ -28,13 +21,11 @@ const GameContainer = (props) => {
     return (
         <div>
             <UserField />
-            {props.room.table ? <Room /> : <RoomsList />}
+            {room.table ? <Room /> : <RoomsList />}
         </div>
     )
 }
 
-const mapStateToProps = (store) => ({
-    room: store.room
-});
 
-export default connect(mapStateToProps)(GameContainer);
+
+export default GameContainer;

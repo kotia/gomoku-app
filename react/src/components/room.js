@@ -1,20 +1,25 @@
 "use strict";
 import * as React from "react";
-import { connect } from 'react-redux';
 
 import TableCell from './tablecell';
 import RoomInfo from './roominfo';
+import {useRecoilState} from "recoil";
+import {roomSelector} from "../store";
 
-const Room = (props) => {
+const Room = () => {
+
+    const [room] = useRecoilState(roomSelector);
+
+
     // rows = [[cell1, cell2...cell15], [cell16...cell30]...]
     const tableWidth = 15;
-    const rows = props.room.table.reduce((acc, val, index) => {
+    const rows = room.table ? room.table.reduce((acc, val, index) => {
         if (index%tableWidth === 0) {
             acc.push([]);
         }
         acc[acc.length-1].push(val);
         return acc;
-    }, []);
+    }, []) : [];
 
     return (
         <div className="gomoku-container">
@@ -35,8 +40,4 @@ const Room = (props) => {
 
 }
 
-const mapStateToProps = (store) => ({
-    room: store.room
-});
-
-export default connect(mapStateToProps)(Room);
+export default Room;

@@ -1,20 +1,27 @@
 "use strict";
 import * as React from "react";
-import { connect } from 'react-redux';
 
-import {
-    sendExitRoom
-} from "../actions";
 import { userIsWhite, isUserTurn } from '../getUserInfo';
+import {useRecoilState} from "recoil";
+import {roomSelector} from "../store";
 
-const RoomInfo = (props) => {
-    const { room,onExitRoom } = props;
+const RoomInfo = () => {
+
+    const [room, roomAction] = useRecoilState(roomSelector);
+    const [isWhite] = useRecoilState(userIsWhite);
+    const [isTurn] = useRecoilState(isUserTurn);
+
+
+    const onExitRoom = () => {
+        roomAction({ type: 'exit_room' });
+    };
+
 
     return (
         <div className="gomoku-container__info">
             <button onClick={onExitRoom}>Exit this room!</button>
             <br/>
-            {'Your color is ' + (userIsWhite(props) ? 'white' : 'black')}
+            {'Your color is ' + (isWhite ? 'white' : 'black')}
             <br/>
             {'Creator name: ' + room.creatorName}
             <br/>
@@ -24,7 +31,7 @@ const RoomInfo = (props) => {
             }
             <br />
             {room.isFinished ? "" : room.started ?
-                (isUserTurn(props) ? "Now it's your turn" : "waiting for opponents turn") :
+                (isTurn ? "Now it's your turn" : "waiting for opponents turn") :
                 "Waiting for someone to connect"
             }
             <br />
@@ -32,19 +39,7 @@ const RoomInfo = (props) => {
             {room.isDefeat ? <span style={{color:'red'}}>Sorry, you lost!</span> : ''}
             {room.isImpossible ? <span style={{color:'red'}}>Sorry, no one won!</span> : ''}
         </div>
-    )
-
+    );
 }
 
-const mapStateToProps = (store) => ({
-    room: store.room,
-    user: store.user
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    onExitRoom() {
-        dispatch(sendExitRoom());
-    }
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(RoomInfo);
+export default RoomInfo;

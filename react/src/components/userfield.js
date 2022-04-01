@@ -1,18 +1,34 @@
 import * as React from "react";
-import { connect } from 'react-redux';
 
-import {
-    setName, giveName
-} from "../actions";
+import {useRecoilState} from "recoil";
+import {userSelector} from "../store";
 
-const UserFieldContainer = ({user, onGiveName, onSetName}) => {
+const UserFieldContainer = () => {
+
+    const [user, userAction] = useRecoilState(userSelector)
+
+    const [name, setName] = React.useState("");
+
+    const onEditName = (e) => {
+        setName(e.target.value);
+    }
+
+    const onSetName = () => {
+        name.length && userAction({
+            type: 'set_user_name',
+            payload: {
+                name
+            }
+        });
+    }
+
         const nameElement = user.name && user.nameSaved ?
             (
                 <div>Your name is {user.name}</div>
             ):(
                 <div>
                     What is you name?
-                    <input type="text" value={user.name} onChange={onGiveName} />
+                    <input type="text" onChange={onEditName} />
                     <button onClick={onSetName}>Save name!</button>
                 </div>
             );
@@ -25,17 +41,4 @@ const UserFieldContainer = ({user, onGiveName, onSetName}) => {
         )
 }
 
-const mapStateToProps = (store) => ({
-    user: store.user
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    onGiveName(e) {
-        dispatch(giveName(e.target.value));
-    },
-    onSetName() {
-        dispatch(setName());
-    }
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(UserFieldContainer);
+export default UserFieldContainer;

@@ -1,6 +1,23 @@
 
-import io from "socket.io-client";
 import {roomsListStateSetter, roomStateSetter, userStateSetter} from "./store";
+import io from "socket.io-client";
+
+let socket;
+
+export const getSocket = () => {
+    if (!socket) {
+        const host = window.location.origin
+            .replace(/^http/, 'ws')
+            .replace(/:\d+/, ':5001');
+
+        console.log('io connect');
+        socket = io.connect(host, {
+            transports: ["polling"]
+        });
+    }
+
+    return socket;
+};
 
 export function useRecoilMiddleware() {
     const [saveRooms] = roomsListStateSetter();
@@ -8,13 +25,8 @@ export function useRecoilMiddleware() {
     const [setUserName, setUserId] = userStateSetter();
 
     const userId = window.localStorage.userId;
-    const host = window.location.origin
-        .replace(/^http/, 'ws')
-        .replace(/:\d+/, ':5001');
 
-    const socket = io.connect(host, {
-        transports: ["websocket", "polling"]
-    });
+    const socket = getSocket();
 
     socket.on('give:id', (id) => {
         setUserId(id);
@@ -22,6 +34,7 @@ export function useRecoilMiddleware() {
     });
 
     socket.on('give:name', (name) => {
+        console.log('name given');
         setUserName(name);
     });
 

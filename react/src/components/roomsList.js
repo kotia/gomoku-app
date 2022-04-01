@@ -1,25 +1,25 @@
 "use strict";
 import * as React from "react";
-import { connect } from 'react-redux';
-import {createRoom, chooseRoom} from "../actions";
+import {useRecoilState} from "recoil";
+import {roomSelector, roomsListSelector} from "../store";
 
 const CreateRoomButtons = ({createRoom}) => {
     return (
         <div className="create-room-buttons">
-            <button data-color="white" onClick={createRoom}>Create room with you as White!</button>
-            <button data-color="black" onClick={createRoom}>Create room with you as Black!</button>
+            <button data-color="white" onClick={createRoom(true)}>Create room with you as White!</button>
+            <button data-color="black" onClick={createRoom(false)}>Create room with you as Black!</button>
         </div>
     );
 }
 
 const RoomsList = ({rooms, chooseRoom}) => {
+
     return (
         <div className="rooms-list">
             {rooms.map((room, index) => {
                 return(
                     <div className="rooms-list__room"
-                         onClick={chooseRoom}
-                         data-id={room.id}
+                         onClick={chooseRoom(room.id)}
                          key={index}
                     >
                         {room.creatorName || room.id}: {'You play ' + (room.isYouWhite ? 'white' : 'black')}
@@ -30,16 +30,28 @@ const RoomsList = ({rooms, chooseRoom}) => {
     );
 }
 
-const RoomsListContainer = ({rooms}) => {
+const RoomsListContainer = () => {
 
-    const createRoom = (e) => {
-        const isWhite = e.currentTarget.dataset.color === 'white';
-        this.props.onCreateRoom(isWhite);
+    const [rooms, roomsListAction] = useRecoilState(roomsListSelector);
+    const [, roomAction] = useRecoilState(roomSelector);
+
+    const createRoom = (isWhite) => () => {
+        roomsListAction({
+            type: 'create_room',
+            payload: {
+                isWhite
+            }
+        })
     }
 
-    const chooseRoom = (e) => {
-        this.props.onChooseRoom(e.currentTarget.dataset.id);
-    }
+    const chooseRoom = (id) => () => {
+        roomAction({
+            type: 'choose_room',
+            payload: {
+                id
+            }
+        });
+    };
 
         return (
             <div>
@@ -51,17 +63,4 @@ const RoomsListContainer = ({rooms}) => {
 
 }
 
-const mapStateToProps = (store) => ({
-    rooms: store.rooms
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    onCreateRoom(isWhite) {
-        dispatch(createRoom(isWhite));
-    },
-    onChooseRoom(id) {
-        dispatch(chooseRoom(id));
-    }
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(RoomsListContainer);
+export default RoomsListContainer;

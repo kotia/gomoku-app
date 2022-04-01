@@ -1,16 +1,23 @@
 "use strict";
 import * as React from "react";
-import { connect } from 'react-redux';
 
-import { makeTurn } from "../actions";
 import { isUserTurn } from "../getUserInfo";
+import {useRecoilState} from "recoil";
+import {roomSelector} from "../store";
 
-const TableCellContainer = ({ cell, room, onMakeTurn }) => {
+const TableCellContainer = ({ cell }) => {
 
+    const [, roomAction] = useRecoilState(roomSelector);
+    const [userTurn] = useRecoilState(isUserTurn);
 
     const makeTurn = () => {
-        if (cell.isEmpty && isUserTurn({room})) {
-            onMakeTurn(cell.id);
+        if (cell.isEmpty && userTurn) {
+            roomAction({
+                type: 'make_turn',
+                payload: {
+                    id: cell.id
+                }
+            });
         }
     }
 
@@ -26,15 +33,4 @@ const TableCellContainer = ({ cell, room, onMakeTurn }) => {
         )
 }
 
-const mapStateToPropsOne = (store) => ({
-    user: store.user,
-    room: store.room
-});
-
-const mapDispatchToPropsOne = (dispatch) => ({
-    onMakeTurn(id) {
-        dispatch(makeTurn(id));
-    }
-});
-
-export default connect(mapStateToPropsOne, mapDispatchToPropsOne)(TableCellContainer);
+export default TableCellContainer;
