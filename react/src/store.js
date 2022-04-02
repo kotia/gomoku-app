@@ -61,7 +61,6 @@ export const userSelector = selector({
         const socket = getSocket();
         if (action.type === 'set_user_name')
         {
-            console.log('name is set', action.payload.name);
             socket.emit('name:set', action.payload.name);
         }
     }

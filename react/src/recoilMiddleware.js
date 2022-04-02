@@ -1,6 +1,7 @@
 
 import {roomsListStateSetter, roomStateSetter, userStateSetter} from "./store";
 import io from "socket.io-client";
+import {useState} from "react";
 
 let socket;
 
@@ -23,18 +24,19 @@ export function useRecoilMiddleware() {
     const [saveRooms] = roomsListStateSetter();
     const [enterRoom, updateRoom, winGame, defeatGame, gameImpossible, exitRoom] = roomStateSetter();
     const [setUserName, setUserId] = userStateSetter();
+    const [didInit, setDidInit] = useState(false);
 
     const userId = window.localStorage.userId;
 
     const socket = getSocket();
 
     socket.on('give:id', (id) => {
+        console.log(window.localStorage.userId, id);
         setUserId(id);
         window.localStorage.userId = id;
     });
 
     socket.on('give:name', (name) => {
-        console.log('name given');
         setUserName(name);
     });
 
@@ -67,7 +69,11 @@ export function useRecoilMiddleware() {
     });
 
     const init = () => {
-        socket.emit('page:loaded', userId || 'no');
+        if (!didInit) {
+            setDidInit(true);
+            socket.emit('page:loaded', userId || 'no');
+        }
+
     }
 
     return [init];
