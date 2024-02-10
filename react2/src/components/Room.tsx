@@ -1,25 +1,19 @@
-"use strict";
-import * as React from "react";
+import {useMemo, memo} from "react";
+import TableCell from "./TableCell.tsx";
+import {IRoomState, ITableCell} from "../types/types.ts";
 
-import TableCell from './tablecell';
-import RoomInfo from './roominfo';
-import {useRecoilState} from "recoil";
-import {roomSelector} from "../store";
+const tableWidth = 15;
 
-const Room = () => {
-
-    const [room] = useRecoilState(roomSelector);
-
+const Room = ({room, isTurn}: {room: IRoomState, isTurn: boolean}) => {
 
     // rows = [[cell1, cell2...cell15], [cell16...cell30]...]
-    const tableWidth = 15;
-    const rows = room.table ? room.table.reduce((acc, val, index) => {
+    const rows = useMemo(() => room.table ? room.table.reduce((acc, val, index) => {
         if (index%tableWidth === 0) {
             acc.push([]);
         }
         acc[acc.length-1].push(val);
         return acc;
-    }, []) : [];
+    }, [] as ITableCell[][]) : [], [room]);
 
     return (
         <div className="gomoku-container">
@@ -28,16 +22,15 @@ const Room = () => {
                     <div key={rowIndex} className="gomoku-container__row">
                         {
                             cells.map((cell, cellIndex) =>
-                                <TableCell cell={cell} key={rowIndex * tableWidth + cellIndex} />
+                                <TableCell cell={cell} key={rowIndex * tableWidth + cellIndex} isUsersTurn={isTurn} />
                             )
                         }
                     </div>
                 )}
             </div>
-            <RoomInfo/>
         </div>
     )
 
 }
 
-export default Room;
+export default memo(Room);

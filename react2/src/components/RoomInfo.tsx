@@ -1,21 +1,13 @@
-"use strict";
-import * as React from "react";
+import {memo, useCallback} from "react";
+import {IRoomState} from "../types/types.ts";
+import {getSocket} from "../socket.ts";
 
-import { userIsWhite, isUserTurn } from '../getUserInfo';
-import {useRecoilState} from "recoil";
-import {roomSelector} from "../store";
+const RoomInfo = ({room, isTurn, isWhite}: {room: IRoomState, isTurn: boolean, isWhite: boolean}) => {
+    const socket = getSocket();
 
-const RoomInfo = () => {
-
-    const [room, roomAction] = useRecoilState(roomSelector);
-    const [isWhite] = useRecoilState(userIsWhite);
-    const [isTurn] = useRecoilState(isUserTurn);
-
-
-    const onExitRoom = () => {
-        roomAction({ type: 'exit_room' });
-    };
-
+    const onExitRoom = useCallback(() => {
+        socket.emit('room:exit');
+    }, []);
 
     return (
         <div className="gomoku-container__info">
@@ -42,4 +34,4 @@ const RoomInfo = () => {
     );
 }
 
-export default RoomInfo;
+export default memo(RoomInfo);

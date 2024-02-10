@@ -1,15 +1,17 @@
 version: '3.8'
 services:
   static:
-    build: ./nginx
+    image: nginx:1.19.2
     volumes:
       - "./nginx/conf:/etc/nginx/"
+      - "build:/usr/share/nginx/front1"
     ports:
       - "5001:80"
     links:
       - node
     depends_on:
       - react
+
   node:
     build: ./node
     environment:
@@ -20,19 +22,19 @@ services:
       - "be-node-modules:/home/node/app/node_modules/"
     ports:
       - "3001:3001"
-  react:
+
+  react2:
     build: ./react
     volumes:
       - "build:/home/node/app/build"
       - "./react:/home/node/app/"
       - "fe-node-modules:/home/node/app/node_modules/"
     ports:
-      - "3000:3000"
+      - "5173:5173"
     environment:
       - CHOKIDAR_USEPOLLING=true
     stdin_open: true
     tty: true
-
 
 volumes:
   build:
