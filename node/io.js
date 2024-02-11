@@ -54,7 +54,9 @@ module.exports.init = function(server) {
         let user;
 
         socket.on('page:loaded', (receivedId) => {
-            if (receivedId === 'no' || !users.find((user) => !user.isActive && receivedId === user.id)) {
+            user = users.find((user) => receivedId === user.id);
+
+            if (!user || (user && !user.isActive)) {
                 user = {
                     id: generateUserId(),
                     name: "",
@@ -66,7 +68,6 @@ module.exports.init = function(server) {
                 users.push(user);
                 socket.emit('give:id', user.id);
             } else {
-                user = users.find((user) => receivedId === user.id);
                 room = rooms.find((room) => room.creatorId === user.id || room.opponentId === user.id);
                 socket.emit('give:id', user.id);
                 if (user.name) {
@@ -193,7 +194,7 @@ module.exports.init = function(server) {
             }
         });
 
-        socket.on('room:exit', () => {
+        socket.on('room:exit', () => {``
             // if user exits from room that he hasn't created and he wasn't played in it - room will appear in list
             // else - room will hide forever
             if (!room.table.find((cell) => !cell.isEmpty) && (room.creatorId !== user.id)) {

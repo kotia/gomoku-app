@@ -26,12 +26,6 @@ const Game = () => {
     const userIsWhite = userIsCreator === activeRoomObj?.creatorIsWhite;
     const isUsersTurn = activeRoomObj?.isWhiteTurn === userIsWhite;
 
-    console.log('!----');
-    console.log(activeRoomObj);
-    console.log(activeRoom);
-    console.log(rooms);
-    console.log('-----');
-
     return (
         <div>
             <UserField />

@@ -62,10 +62,11 @@ export const useRoomsStore = create<IRooms>()(roomsSocketMiddleware((setState) =
             isFinished: true
         } : room),
     })),
-    exitRoom: () => setState((state) => ({
+    exitRoom: (id?: string) => setState((state) => ({
         ...state,
         lastAction: 'exit_room',
-        activeRoom: '',
+        rooms: id ? state.rooms.filter((room) => room.id !== id) : state.rooms,
+        activeRoom: id ? state.activeRoom : '',
     })),
 })));
 

@@ -9,13 +9,13 @@ const cellConstructor = (id) => ({
     id: id
 });
 
-let fillCell = function(table, number, isWhite){
+const fillCell = function(table, number, isWhite){
     table[number].isEmpty = false;
     table[number].isWhite = isWhite;
     return checkVictory(table, number);
 };
 
-let tableConstructor = function(){
+const tableConstructor = function(){
     let table = [];
     for(let i = 0; i < rowLength*rowLength; i++) {
         table.push(cellConstructor(i));
@@ -23,7 +23,7 @@ let tableConstructor = function(){
     return table;
 };
 
-let watchLine = function(table, isWhite, cell, row, cellModifier, rowModifier, only){
+const watchLine = function(table, isWhite, cell, row, cellModifier, rowModifier, only){
     // if only = true, then we count only cells with the same color
     // if only = false, we count cells with color AND empty cells
     let length = 0;
@@ -53,7 +53,7 @@ let watchLine = function(table, isWhite, cell, row, cellModifier, rowModifier, o
     return length;
 };
 
-let watchLines = function(table, isWhite, cell, row, only) {
+const watchLines = function(table, isWhite, cell, row, only) {
     const results = [];
     let isOk = false;
     const cellNumber = rowLength * row + cell;
@@ -81,7 +81,7 @@ let watchLines = function(table, isWhite, cell, row, only) {
     return isOk;
 };
 
-let checkVictory = function(table, cellNumber) {
+const checkVictory = function(table, cellNumber) {
     let row = Math.floor(cellNumber/rowLength);
     let cell = cellNumber - row * rowLength;
     let isWhite = table[cellNumber].isWhite;
@@ -93,7 +93,7 @@ let checkVictory = function(table, cellNumber) {
     return watchLines(table, isWhite, cell, row, true);
 };
 
-let checkPossibility = function(table, isWhite) {
+const checkPossibility = function(table, isWhite) {
     let isPossible = false;
     let i = 0;
     while(!isPossible && i < rowLength*rowLength) {

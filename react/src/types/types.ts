@@ -42,5 +42,5 @@ export interface IRooms {
     winGame: () => void;
     defeatGame: () => void;
     makeImpossible: () => void;
-    exitRoom: () => void;
+    exitRoom: (id?: string) => void;
 }

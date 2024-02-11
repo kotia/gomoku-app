@@ -44,8 +44,6 @@ export const useSocketEvents = () => {
         if (!isUserLoaded.current) {
             socket.emit('page:loaded', userId || 'no');
 
-            console.log('emit');
-
             isUserLoaded.current = true;
 
             socket.on('rooms:list', (rooms: IBackendRoomState[]) => {
@@ -73,8 +71,8 @@ export const useSocketEvents = () => {
                 defeatGame();
             });
 
-            socket.on('room:exit', () => {
-                exitRoom();
+            socket.on('room:exit', (id?: string) => {
+                exitRoom(id);
             });
 
             socket.on('give:id', (id) => {
@@ -83,7 +81,6 @@ export const useSocketEvents = () => {
             });
 
             socket.on('give:name', (name) => {
-                console.log('name', name);
                 setUsername(name);
             });
         }
