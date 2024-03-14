@@ -2,52 +2,56 @@
 
 let io;
 const gomoku = require('./gomokuLogic');
-const EventEmitter = require('events');
+const {rooms, users} = require('./store');
 
-class GoEmitter extends EventEmitter {}
-const goEmitter = new GoEmitter();
+const generateUserId = () => {
+    if (!users.length) {
+        return 0;
+    } else {
+        return Math.max.apply(null, users.map((user) => user.id)) + 1;
+    }
+};
+
+const createRoom = (isWhite, userId) => {
+    let room = {
+        id: rooms.length,
+        creatorId: userId,
+        creatorName: users.find(function(user){return userId === user.id}).name,
+        opponentId: undefined,
+        opponentName: '',
+        creatorIsWhite: isWhite,
+        creatorCanProceed: true,
+        opponentCanProceed: true,
+        finished: false,
+        started: false,
+        isWhiteTurn: false,
+        table: gomoku.tableConstructor()
+    };
+
+    return room;
+};
+
+const createUser = () => ({
+    id: generateUserId(),
+    name: "",
+    isWhite: false,
+    isPlaying: false,
+    possibleToProceed: true,
+    isActive: true
+});
+
+const filterRooms = function(userId){
+    return rooms.filter((room) => !room.started && !room.finished && (room.creatorId !== userId))
+        .map((room) => ({
+            id: room.id,
+            creatorId: room.creatorId,
+            creatorName: room.creatorName,
+            creatorIsWhite: room.creatorIsWhite
+        }));
+};
 
 module.exports.init = function(server) {
     io = server;
-    let rooms = [];
-    let users = [];
-
-    const generateUserId = function(){
-        if (!users.length) {
-            return 0;
-        } else {
-            return Math.max.apply(null, users.map((user)=>user.id)) + 1;
-        }
-    };
-
-    let createRoom = function(isWhite, userId) {
-        let room = {
-            id: rooms.length,
-            creatorId: userId,
-            creatorName: users.find(function(user){return userId === user.id}).name,
-            opponentId: undefined,
-            opponentName: '',
-            creatorIsWhite: isWhite,
-            creatorCanProceed: true,
-            opponentCanProceed: true,
-            finished: false,
-            started: false,
-            isWhiteTurn: false,
-            table: gomoku.tableConstructor()
-        };
-        rooms.push(room);
-        return room;
-    };
-
-    let filterRooms = function(userId){
-        return rooms.filter((room) => !room.started && !room.finished && (room.creatorId !== userId))
-            .map((room) => ({
-                    id: room.id,
-                    creatorId: room.creatorId,
-                    creatorName: room.creatorName,
-                    creatorIsWhite: room.creatorIsWhite
-            }));
-    };
 
     io.on('connection', (socket) => {
         let room;
@@ -57,19 +61,13 @@ module.exports.init = function(server) {
             user = users.find((user) => receivedId === user.id);
 
             if (!user || (user && !user.isActive)) {
-                user = {
-                    id: generateUserId(),
-                    name: "",
-                    isWhite: false,
-                    isPlaying: false,
-                    possibleToProceed: true,
-                    isActive: true
-                };
+                user = createUser();
                 users.push(user);
                 socket.emit('give:id', user.id);
             } else {
                 room = rooms.find((room) => room.creatorId === user.id || room.opponentId === user.id);
                 socket.emit('give:id', user.id);
+
                 if (user.name) {
                     socket.emit('give:name', user.name);
                 }
@@ -88,21 +86,18 @@ module.exports.init = function(server) {
             }
         };
 
-        goEmitter.on('rooms:update', roomsUpdateCallback);
-
         let roomUpdateCallback = function(roomId){
             if(room && roomId === room.id) {
                 socket.emit('room:update', room);
             }
         };
 
-        goEmitter.on('room:update', roomUpdateCallback);
-
         let roomVictoryCallback = function(winnerId, roomId) {
             if (room && roomId === room.id) {
                 room.finished = true;
-                goEmitter.emit('rooms:update');
+                roomsUpdateCallback();
                 socket.emit('room:update', room);
+
                 if (winnerId === user.id) {
                     socket.emit('room:victory');
                 } else {
@@ -110,8 +105,6 @@ module.exports.init = function(server) {
                 }
             }
         };
-
-        goEmitter.on('room:victory', roomVictoryCallback);
 
         let roomPosibilityCallback = function(roomId){
             if (room && roomId === room.id) {
@@ -122,22 +115,18 @@ module.exports.init = function(server) {
                 }
                 if (!room.creatorCanProceed && !room.opponentCanProceed) {
                     room.finished = true;
-                    goEmitter.emit('rooms:update');
+                    roomsUpdateCallback();
                     socket.emit('room:update', room.id);
                     socket.emit('room:impossible');
                 }
             }
         };
 
-        goEmitter.on('room:possibility', roomPosibilityCallback);
-
         let roomExitCallback = function(roomId){
             if (room && room.id === roomId) {
                 socket.emit('room:exit');
             }
         };
-
-        goEmitter.on('room:exit', roomExitCallback);
 
         socket.on('name:set', function(name){
             user.name = name;
@@ -146,19 +135,20 @@ module.exports.init = function(server) {
             let assignedRoom = rooms.find((room) => room.opponentId === user.id);
             if (createdRoom) {
                 createdRoom.creatorName = name;
-                goEmitter.emit('rooms:update');
-                goEmitter.emit('room:update', createdRoom.id);
+                roomsUpdateCallback();
+                roomUpdateCallback(createdRoom.id);
             } else if (assignedRoom) {
                 assignedRoom.opponentName = name;
-                goEmitter.emit('room:update', assignedRoom.id);
+                roomUpdateCallback(assignedRoom.id);
             }
         });
 
         socket.on('room:create', (isWhite) => {
             room = createRoom(isWhite, user.id);
+            rooms.push(room);
             user.isPlaying = true;
             user.isWhite = isWhite;
-            goEmitter.emit('rooms:update');
+            roomsUpdateCallback();
             socket.emit('room:enter', room);
         });
 
@@ -170,8 +160,8 @@ module.exports.init = function(server) {
             room.started = true;
             user.isPlaying = true;
             socket.emit('room:enter', room);
-            goEmitter.emit('rooms:update');
-            goEmitter.emit('room:update', room.id);
+            roomsUpdateCallback();
+            roomUpdateCallback(room.id);
         });
 
         socket.on('room:makeTurn', (id) => {
@@ -179,22 +169,22 @@ module.exports.init = function(server) {
                 room.table[id].isEmpty = false;
                 room.table[id].isWhite = room.isWhiteTurn;
                 room.isWhiteTurn = !room.isWhiteTurn;
-                goEmitter.emit('room:update', room.id);
+                roomUpdateCallback(room.id);
 
                 if (gomoku.checkVictory(room.table, id)) {
-                    goEmitter.emit('room:victory', user.id, room.id);
+                    roomVictoryCallback(user.id, room.id);
                 } else {
                     if (user.possibleToProceed) {
                         user.possibleToProceed = gomoku.checkPossibility(room.table, user.isWhite);
                     }
                     if (!user.possibleToProceed) {
-                        goEmitter.emit('room:possibility', room.id);
+                        roomPosibilityCallback(room.id);
                     }
                 }
             }
         });
 
-        socket.on('room:exit', () => {``
+        socket.on('room:exit', () => {
             // if user exits from room that he hasn't created and he wasn't played in it - room will appear in list
             // else - room will hide forever
             if (!room.table.find((cell) => !cell.isEmpty) && (room.creatorId !== user.id)) {
@@ -202,20 +192,14 @@ module.exports.init = function(server) {
                 socket.emit('room:exit');
             } else {
                 room.finished = true;
-                goEmitter.emit('room:exit', room.id);
+                roomExitCallback(room.id);
             }
-            goEmitter.emit('rooms:update');
+            roomsUpdateCallback();
         });
 
         socket.on('disconnect', () => {
-            goEmitter.removeListener('rooms:update', roomsUpdateCallback);
-            goEmitter.removeListener('room:update', roomUpdateCallback);
-            goEmitter.removeListener('room:victory', roomVictoryCallback);
-            goEmitter.removeListener('room:possibility', roomPosibilityCallback);
-            goEmitter.removeListener('room:exit', roomExitCallback);
-
             if (user) {
-                user.isActive = false;
+                //user.isActive = false;
                 console.log('User ' + user.id + ' disconnected');
             }
         });

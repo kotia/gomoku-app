@@ -24,7 +24,7 @@ var server = http.createServer(app);
 
 const io = new Server(server);
 
-require('../io').init(io);
+require('../services/io').init(io);
 
 /**
  * Listen on provided port, on all network interfaces.
